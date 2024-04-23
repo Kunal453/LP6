@@ -1,0 +1,140 @@
+print("hello")
+
+import numpy as np 
+import pandas as pd
+
+import tensorflow as tf
+from keras.datasets import imdb
+
+
+(X_train, y_train), (X_test,y_test) = imdb.load_data(num_words = 1000)
+
+data = np.concatenate((X_train,X_test), axis = 0)
+label = np.concatenate((y_train, y_test), axis = 0)
+
+print ("reviews is: ",X_train[5])
+print ("reviews is: ",y_train[5])
+
+vocab = imdb.get_word_index()
+print(vocab)
+
+data
+
+label
+
+def vectorize(sequence, dimension = 1000):
+  results = np.zeros((len(sequence), dimension))
+  for i, sequence in enumerate(sequence):
+      results[i,sequence] = 1
+  return results
+
+test_x = data[:1000]
+test_y = data[:1000]
+train_x = data[:1000]
+train_y = data[:1000]
+
+print("category: ",np.unique(label))
+print("numof unique word: ", len(np.unique(np.hstack(data))))
+
+length = [len(i) for i in data]
+print(np.mean(length))
+print(round(np.std(length)))
+
+print(label[0])
+
+print(data[0])
+
+index = imdb.get_word_index()
+reverse_index =dict([(value, key) for (key , value) in index.items()])
+
+decoded = " ".join( [reverse_index.get(i-3, '#') for i in data[0]])
+print(decoded)
+
+index
+
+decoded
+
+data = vectorize(data)
+
+label = np.array(label).astype("float32")
+
+data
+
+import seaborn as sns
+sns.set(color_codes = True)
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+labelDF = pd.DataFrame({'label':label})
+sns.countplot(x='label',data = labelDF)
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(data,label, test_size= 0.20, random_state=1)
+
+X_train.shape
+
+!pip install tensorflow keras
+
+from tensorflow.keras.utils import to_categorical
+
+from keras import models
+from keras import layers
+
+model = models.Sequential()
+
+model.add(layers.Dense(50,activation= "relu", input_shape = (1000, )))
+model.add(layers.Dropout(0.3, noise_shape = None, seed= None))
+model.add(layers.Dense(50,activation="relu"))
+model.add(layers.Dropout(0.2, noise_shape = None, seed = None))
+model.add(layers.Dense(50,activation ="relu"))
+
+model.add(layers.Dense(1, activation="sigmoid"))
+model.summary()
+
+import tensorflow as tf
+
+# Import the correct module for callbacks
+from tensorflow.keras.callbacks import EarlyStopping
+
+# Create the EarlyStopping callback
+callback = EarlyStopping(monitor='loss', patience=3)
+
+model.compile(
+    optimizer = 'adam',
+    loss = 'binary_crossentropy',
+    metrics = 'accuracy'
+)
+
+results = model.fit(
+    X_train,y_train,
+    epochs = 2,
+    batch_size = 500,
+    validation_data = (X_test, y_test),
+    callbacks = [callback]
+)
+
+print(np.mean(results.history["val_accuracy"]))
+
+print(results.history.keys())
+
+plt.plot(results.history['accuracy'])
+plt.plot(results.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show
+
+
+
+plt.plot(results.history['loss'])
+plt.plot(results.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show
+
+model.predict(X_test)
+
